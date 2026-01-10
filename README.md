@@ -64,12 +64,12 @@ A curated selection of essays exploring governance, event contracts, drift, and 
 
 - **[Designing for Truth: Event Contracts as Product Design](https://medium.com/@rtfenter/designing-for-truth-event-contracts-as-product-design-bf9e1feb9189)**  
 - **[Designing Flexibility Without Drift: The Real Work of Exception Handling](https://medium.com/@rtfenter/exceptions-not-excuses-designing-systems-that-bend-without-breaking-b1c7c7fe177c)**  
-- **[When Data Wanders Off](https://medium.com/@rtfenter/when-data-wanders-off-d34e8dabb2cd)**  
+- **[When Data Wanders Off](https://medium.com/@rtfenter/when-data-wanders-off-d34e8dabb2cd)**
+- **[Making Drift Visible](https://medium.com/@rtfenter/making-drift-visible-ffff2a0e650b)**
 
 Planned essays on governance, drift, exception handling, and system truth.
 (These essays are not yet written — titles represent upcoming work.)
 
-- Making Drift Visible  
 - The Spike Test  
 - When Success Breaks You  
 
