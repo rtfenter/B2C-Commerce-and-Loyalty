@@ -67,11 +67,7 @@ A curated selection of essays exploring governance, event contracts, drift, and 
 - **[When Data Wanders Off](https://medium.com/@rtfenter/when-data-wanders-off-d34e8dabb2cd)**
 - **[Making Drift Visible](https://medium.com/@rtfenter/making-drift-visible-ffff2a0e650b)**
 - **[The Spike Test](https://medium.com/@rtfenter/the-spike-test-545c8832949a)**
-
-Planned essays on governance, drift, exception handling, and system truth.
-(These essays are not yet written — titles represent upcoming work.)
-
-- When Success Breaks You  
+- **[When Success Breaks You](https://medium.com/@rtfenter/when-success-breaks-you-<PASTE-CORRECT-ID>)**
 
 
 ---
