@@ -1,237 +1,149 @@
-# Systems of Trust Series  
-### Applied governance, event integrity, and system truth
+# Platform Systems
 
-This series collects my work on systems of trust — where distributed systems, events, and human decision-making meet.  
-It includes essays, diagrams, and small technical projects exploring how systems maintain coherence, truth, and alignment across teams, services, and time.
+**Lifecycle · Access & Permissions · Internal Tools · Controls & Governance**
 
-My goal: translate abstract trust & governance concepts into practical tools and artifacts that engineers, PMs, and data teams can reason with.
+Product studies exploring the systems underneath customer-facing products: how account states propagate, how permissions are defined, how internal teams operate the platform, and how product rules remain consistent across interconnected services.
 
----
-
-## Purpose of This Series  
-
-Trust in distributed systems isn’t just about uptime or retries. It emerges from:
-
-- clear event contracts and shared language  
-- safe handling of exceptions without losing integrity  
-- traceable ownership and observability to prevent drift  
-- routing and boundaries that behave the way teams think they do  
-
-This series aims to make that trust **legible** and **actionable** through essays, diagrams, and small, high-signal prototypes.
+My professional experience includes 0→1 platform work spanning accounts, transactions, product data, rewards, internal admin tooling, and financial controls. I'm interested in the places where a simple customer-facing state depends on multiple systems agreeing on what that state actually means.
 
 ---
 
-## Why This Matters for Product Strategy
+## 01 / Lifecycle
 
-Trust is a product problem long before it becomes an engineering problem.
+### "Suspended" Is Not One State
 
-Stronger contracts, cleaner governance, and clearer ownership boundaries lead directly to:
+A customer or partner account may exist across commerce, billing, rewards, support tooling, and internal operations.
 
-- **fewer incidents** caused by silent mismatches and schema drift  
-- **faster integrations** between teams, markets, and external partners  
-- **less data corruption** and fewer analytics/ML inconsistencies  
-- **safer compliance and privacy posture**, grounded in explicit boundaries  
-- **greater platform extensibility**, because new features don’t break old ones  
+Changing the account to **Suspended** creates a product problem:
 
-These prototypes are not engineering artifacts — they are product tools that help teams see, reason about, and align on system truth before it becomes expensive to fix.
+**What should actually stop?**
 
----
+**Account state → Commerce → Billing → Rewards → Access → Operations**
 
-## Product Architecture Philosophy
+A single label can imply very different behavior across the ecosystem.
 
-Every system carries an implicit philosophy — a shape that determines what breaks, what drifts, and what stays coherent under pressure.
+| Surface | Product question |
+| --- | --- |
+| Commerce | Can new transactions be created? |
+| Billing | Can existing obligations still be paid? |
+| Rewards | Can value be earned, validated, or redeemed? |
+| User access | Can users still sign in or view history? |
+| Internal tools | Who can suspend or restore the account? |
+| Audit | What reason, actor, and timestamp must be retained? |
 
-My approach to product architecture is built on three principles:
+**The decision principle:** define lifecycle states by their effects, not just their names.
 
-1. **Meaning is a first-class API**  
-   Systems fail when teams stop agreeing on what things mean.  
-   Product’s role is to preserve shared definitions across services, versions, and time.
+A strong state model makes the downstream behavior explicit so each system does not invent its own interpretation of "suspended."
 
-2. **Governance is design, not documentation**  
-   Boundaries, contracts, invariants, and ownership rules are part of the product surface — not an afterthought or a Confluence page.
-
-3. **Trust scales when friction scales predictably**  
-   Healthy systems bend without fracturing.  
-   Architecture succeeds when exceptions, upgrades, and integrations behave the way teams expect.
-
-This series expresses that philosophy through tools, diagrams, and small artifacts that make invisible system behaviors visible.
-
+**What I'd measure:** state propagation failures, manual corrections, support escalations, and time to resolve lifecycle exceptions.
 
 ---
 
-## Writing  
-A curated selection of essays exploring governance, event contracts, drift, and system truth.
+## 02 / Access & Permissions
 
-- **[Designing for Truth: Event Contracts as Product Design](https://medium.com/@rtfenter/designing-for-truth-event-contracts-as-product-design-bf9e1feb9189)**  
-- **[Designing Flexibility Without Drift: The Real Work of Exception Handling](https://medium.com/@rtfenter/exceptions-not-excuses-designing-systems-that-bend-without-breaking-b1c7c7fe177c)**  
-- **[When Data Wanders Off](https://medium.com/@rtfenter/when-data-wanders-off-d34e8dabb2cd)**
-- **[Making Drift Visible](https://medium.com/@rtfenter/making-drift-visible-ffff2a0e650b)**
-- **[The Spike Test](https://medium.com/@rtfenter/the-spike-test-545c8832949a)**
-- **[When Success Breaks You](https://medium.com/@rtfenter/when-success-breaks-you-<PASTE-CORRECT-ID>)**
+### Account State ≠ User Authority
 
+A business account can be active while an individual user should not have permission to perform every action.
 
----
+That means product design has to separate:
 
-## Projects  
-These projects each have their own repo and contribute to the broader Systems of Trust portfolio.
+**Account status → User role → Permission → Action**
 
-### Series Index
+Examples:
 
-| Prototype | Purpose | Live Demo | Repo |
-|----------|---------|-----------|------|
-| **Event Quality Scanner** | Validate a single event against naming, types, and required fields | https://rtfenter.github.io/Event-Quality-Scanner/ | https://github.com/rtfenter/Event-Quality-Scanner |
-| **Event Consistency Checker** | Compare two events for structural and semantic mismatches | https://rtfenter.github.io/Event-Consistency-Checker/ | https://github.com/rtfenter/Event-Consistency-Checker |
-| **Truth Drift Map — System Edition** | Visualize meaning & schema drift over time and across services | https://rtfenter.github.io/Truth-Drift-Map/ | https://github.com/rtfenter/Truth-Drift-Map |
-| **Cross-Service Meaning Comparator** | Compare service interpretations of a concept to detect semantic drift | https://rtfenter.github.io/Cross-Service-Meaning-Comparator/ | https://github.com/rtfenter/Cross-Service-Meaning-Comparator |
-| **Schema Evolution Impact Analyzer** | Check if v2 schema changes break downstream services | https://rtfenter.github.io/Schema-Evolution-Impact-Analyzer/ | https://github.com/rtfenter/Schema-Evolution-Impact-Analyzer |
-| **Event Routing Contract Checker** | Validate routing rules & filtering logic before events ship | https://rtfenter.github.io/Event-Routing-Contract-Checker/ | https://github.com/rtfenter/Event-Routing-Contract-Checker |
-| **Ownership Boundary Validator** | Highlight where fields cross privacy/legal/domain boundaries | https://rtfenter.github.io/Ownership-Boundary-Validator/ | https://github.com/rtfenter/Ownership-Boundary-Validator |
+| Role | Example responsibility |
+| --- | --- |
+| Business owner | Account-level authority |
+| Finance user | Billing and transaction responsibilities |
+| Program operator | Rewards or program operations |
+| Support user | Investigation and limited intervention |
 
----
+The product problem is not simply creating roles.
 
-## System Diagrams  
-These diagrams illustrate how trust behaves inside distributed systems.
+It is defining **who can do what, under which account conditions, and with what consequences**.
 
-### Event Contract Flow — From Producer to Consumers
+**The decision principle:** model authority separately from account lifecycle so access rules remain understandable as the platform grows.
 
-    [Producer Service]
-          |
-          v
-    [Event Created]
-      - name
-      - schema version
-      - required fields
-          |
-          v
-    [Contract Validator]
-      - field presence & types
-      - enums / invariants
-      - domain-specific rules
-          |
-          v
-    [Event Bus / Stream]
-          |
-          v
-    [Consumers]
-      - services
-      - analytics
-      - ML
-      - audits
-
-    If the contract is weak here,
-    every downstream system negotiates its own “truth”.
+**What I'd measure:** permission-related support issues, unauthorized-action prevention, manual access overrides, and time to provision or change access.
 
 ---
 
-### Truth Drift Map — Services & Versions
+## 03 / Internal Products
 
-              [Canonical Definition]
-             (event + meaning + invariants)
-                         |
-         ----------------------------------------
-         |                  |                  |
-         v                  v                  v
-     [Service A]        [Service B]        [Service C]
-      v1, v2             v1 only            v2 + local enum
+### External Experience ≠ Complete Product
 
-    Examples:
-    - Service A adds new enum values
-    - Service B never upgrades schema
-    - Service C reuses a field for a new concept
+Customer-facing features often depend on internal teams being able to operate, investigate, and correct the system safely.
 
-    Result:
-    - different meanings for the same field name
-    - broken joins, inconsistent analytics
-    - incidents that are “interpretation disputes”
-      instead of clear facts
+An external action may require an internal counterpart:
 
----
+**Customer action → System state → Operator visibility → Controlled intervention → Audit history**
 
-### Schema Evolution Impact View
+For example, an internal admin experience may need to support:
 
-    [Schema v1]
-      - fields: A, B, C
-      - types: string, int, enum
+- lifecycle changes
+- eligibility overrides
+- account investigation
+- exception resolution
+- role management
+- reason capture
+- audit history
 
-        |
-        |  (proposed change)
-        v
+The PM problem is deciding **which operational capabilities must exist for the external product to be supportable at scale**.
 
-    [Schema v2]
-      - A -> renamed to A_id
-      - B -> type int → string
-      - D -> new required field
+Building the customer experience without the operating model underneath it creates hidden manual work and inconsistent decisions.
 
-    Downstream Services:
+**The decision principle:** treat internal operators as real product users with defined workflows, permissions, and failure states.
 
-    - Service X
-        expects A, B
-        breaks on rename + type change
-
-    - Service Y
-        ignores A
-        optional read of C
-        safe, but may miss new D semantics
-
-    - Service Z
-        strict validator on v1
-        treats v2 as invalid and drops events
-
-    Impact:
-    - silent drops
-    - partial upgrades
-    - version skew across the estate
+**What I'd measure:** manual work per account, exception resolution time, repeated escalations, and percentage of operational actions completed through supported workflows.
 
 ---
 
-### Routing & Boundary Overview
+## 04 / Product Lifecycle
 
-                   [Incoming Event]
-                           |
-                           v
-                [Routing Rules & Filters]
-                - field-based conditions
-                - version-aware checks
-                - region / consent logic
-                           |
-          ------------------------------------
-          |                  |               |
-          v                  v               v
-     [Topic A]          [Queue B]       [Drop / DLQ]
+### Deprecation ≠ Deletion
 
-    In parallel:
+Platform products often need to distinguish between something no longer available for new use and something that can safely disappear.
 
-    [Ownership Map]
-    - Who owns each field?
-    - Which systems are allowed to see it?
-    - Where does it become a privacy, legal,
-      or domain boundary violation?
+A simple lifecycle might be:
 
-    Trust lives where routing logic
-    and ownership boundaries stay aligned.
+**Active → Deprecated → Inactive → Deleted**
 
+Each transition affects different users and systems.
 
----
+Questions include:
 
-## Portfolio & Writing  
-- Medium: https://medium.com/@rtfenter  
-- LinkedIn: https://www.linkedin.com/in/rtfenter/  
-- GitHub: https://github.com/rtfenter  
+- Can existing customers continue using it?
+- Can new customers select it?
+- Should it remain visible in historical transactions?
+- What happens to downstream references?
+- When is deletion actually safe?
+
+**The decision principle:** lifecycle states should preserve history and downstream integrity while still allowing the platform to evolve.
+
+This is especially important for product data, financial records, entitlements, and other objects referenced across multiple systems.
+
+**What I'd measure:** broken downstream references, lifecycle exceptions, manual cleanup, and migration completion.
 
 ---
 
-## About This Repo  
-This repository is the **series hub** for Systems of Trust — writing, diagrams, prototypes, and system models.
+## 05 / Guardrails
+
+### Flexibility Needs Boundaries
+
+Platform systems frequently need configurable behavior: pricing rules, FX handling, eligibility, account controls, or product configuration.
+
+Flexibility without explicit boundaries can create inconsistent outcomes.
+
+The product role is to define:
+
+**Allowed range → Validation rule → Exception path → Ownership**
+
+A guardrail should make invalid states difficult to create while still allowing legitimate operational flexibility.
+
+**The decision principle:** encode important business constraints into the product wherever possible instead of relying on people to remember them.
+
+**What I'd measure:** invalid configuration attempts, production corrections, exception volume, and incidents caused by unsupported states.
 
 ---
 
-## Technologies Used
-
-These prototypes are intentionally lightweight — fast to build, easy to fork, and simple to reason about.
-
-- **HTML / CSS / JavaScript**  
-- **GitHub Pages for static hosting**  
-- **No backend required**  
-
-The goal is clarity, not complexity: high-signal tools that communicate system behavior without infrastructure overhead.
-
+*The studies above draw from product patterns I've encountered professionally. Companies, systems, and implementation details are generalized or fictionalized.*
