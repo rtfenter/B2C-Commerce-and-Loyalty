@@ -4,7 +4,7 @@
 
 Product studies exploring the systems underneath customer-facing products: how account states propagate, how permissions are defined, how internal teams operate the platform, and how product rules remain consistent across interconnected services.
 
-My professional experience includes 0→1 platform work spanning accounts, transactions, product data, rewards, internal admin tooling, and financial controls. I'm interested in the places where a simple customer-facing state depends on multiple systems agreeing on what that state actually means.
+My professional experience includes 0→1 platform work spanning accounts, transactions, product data, rewards, internal admin tooling, and financial controls. A large part of my work focuses on the places where a simple customer-facing state depends on multiple systems agreeing on what that state actually means.
 
 ---
 
