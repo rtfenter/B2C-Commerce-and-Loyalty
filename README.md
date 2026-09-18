@@ -1,149 +1,219 @@
-# Platform Systems
+# B2C Commerce & Loyalty
 
-**Lifecycle · Access & Permissions · Internal Tools · Controls & Governance**
+### Purchase ≠ Final Transaction
 
-Product studies exploring the systems underneath customer-facing products: how account states propagate, how permissions are defined, how internal teams operate the platform, and how product rules remain consistent across interconnected services.
+A purchase can look simple to a customer while creating multiple connected forms of value underneath.
 
-My professional experience includes 0→1 platform work spanning accounts, transactions, product data, rewards, internal admin tooling, and financial controls. A large part of my work focuses on the places where a simple customer-facing state depends on multiple systems agreeing on what that state actually means.
+When loyalty value is earned, redeemed, and then involved in a return or exchange, the product has to answer a harder question:
+
+> **How should rewards and money unwind when the transaction that connected them changes?**
 
 ---
 
-## 01 / Lifecycle
+## The Scenario
 
-### "Suspended" Is Not One State
+Consider a fictional loyalty program where:
 
-A customer or partner account may exist across commerce, billing, rewards, support tooling, and internal operations.
+**1,000 points = $5 reward**
 
-Changing the account to **Suspended** creates a product problem:
+A customer starts with **1,000 points**.
 
-**What should actually stop?**
+They redeem those points for a $5 reward and use it toward a $20 purchase.
 
-**Account state → Commerce → Billing → Rewards → Access → Operations**
+| Purchase | Value |
+| --- | ---: |
+| Item | $20 |
+| Reward applied | $5 |
+| Customer pays | $15 |
 
-A single label can imply very different behavior across the ecosystem.
+The customer also earns points from the qualifying purchase.
 
-| Surface | Product question |
+Later, they return the $20 item and purchase a different item for $10.
+
+From the customer's perspective, this is a straightforward return and new purchase.
+
+Underneath, several forms of value now have to be reconciled.
+
+---
+
+## The Product Problem
+
+The original transaction connected:
+
+**Money paid**
+
+**Loyalty value redeemed**
+
+**New loyalty value earned**
+
+Returning the item means all three need deterministic behavior.
+
+Simply refunding $20 would ignore how the original purchase was funded.
+
+Simply removing earned points would ignore the reward that was redeemed.
+
+Allowing the resulting loyalty balance to become artificially negative pushes system complexity onto the customer.
+
+The product needs to unwind the transaction while preserving where each form of value came from.
+
+---
+
+## Follow the Value
+
+### 1 / Redeem
+
+**1,000 points → $5 reward**
+
+The points become a different form of loyalty value, but their origin still matters if that reward later needs to be reversed.
+
+### 2 / Purchase
+
+**$5 reward + $15 paid → $20 purchase**
+
+The transaction also creates new earned points based on the qualifying purchase.
+
+### 3 / Return
+
+The original purchase is reversed.
+
+That means:
+
+- refund the $15 paid
+- reverse the $5 reward
+- restore the **1,000 points** that created that reward
+- reverse the points earned from the returned purchase
+
+### 4 / New Purchase
+
+The replacement $10 purchase is treated as its own qualifying transaction.
+
+It earns points according to the rules for that purchase rather than inheriting the reward state of the transaction that was returned.
+
+---
+
+## The Product Decision
+
+**Reverse value back to its originating form.**
+
+The $5 reward originated as 1,000 points.
+
+When the transaction using that reward reverses, the loyalty value returns to **1,000 points** rather than becoming an artificial negative balance or disappearing as an absorbed loss.
+
+Likewise, points earned from the returned transaction are reversed because the qualifying activity that created them no longer exists.
+
+The new purchase then creates its own earning event.
+
+---
+
+## Customer Experience vs. System State
+
+The underlying reconciliation is complicated.
+
+The customer experience should not be.
+
+### What the customer needs to understand
+
+**You returned the original item.**  
+Your payment was refunded.
+
+**You got your reward value back.**  
+The 1,000 points used to create the $5 reward were restored.
+
+**Points from the returned purchase were adjusted.**
+
+**Your new purchase earned points normally.**
+
+### What the product resolves underneath
+
+**Reward lifecycle**  
+1,000 points → $5 reward → Applied → Reversed → 1,000 points restored
+
+**Original transaction**  
+$20 purchase → Returned → Payment refunded
+
+**Original earning**  
+Points earned → Reversed
+
+**New transaction**  
+$10 purchase → New earning event
+
+The customer should be able to understand **what changed and why** without needing to understand the ledger mechanics required to make it correct.
+
+---
+
+## Try the Transaction
+
+*[Interactive demo will be linked here.]*
+
+The demo follows the same customer through redemption, purchase, return, and replacement purchase.
+
+At each step it shows:
+
+**Customer View** — what the member sees and needs to understand.
+
+**Product View** — the value transformations and reconciliation rules happening underneath.
+
+The purpose isn't to simulate a loyalty program. It's to make the product decisions behind one transaction visible.
+
+---
+
+## Rules That Need to Stay Deterministic
+
+The same model has to remain predictable beyond the happy path.
+
+| Situation | Product behavior |
 | --- | --- |
-| Commerce | Can new transactions be created? |
-| Billing | Can existing obligations still be paid? |
-| Rewards | Can value be earned, validated, or redeemed? |
-| User access | Can users still sign in or view history? |
-| Internal tools | Who can suspend or restore the account? |
-| Audit | What reason, actor, and timestamp must be retained? |
+| Reward used on returned purchase | Restore value to its originating points |
+| Points earned on returned purchase | Reverse the earning |
+| Partial return | Reverse only value attributable to returned items |
+| Promotional earning | Reverse using the earning rules of the original transaction |
+| New purchase during return | Treat as a new earning event |
+| Refund still processing | Don't represent unresolved value as final |
 
-**The decision principle:** define lifecycle states by their effects, not just their names.
-
-A strong state model makes the downstream behavior explicit so each system does not invent its own interpretation of "suspended."
-
-**What I'd measure:** state propagation failures, manual corrections, support escalations, and time to resolve lifecycle exceptions.
+These rules allow the financial and loyalty states to reconcile without requiring the customer to understand how those systems interact.
 
 ---
 
-## 02 / Access & Permissions
+## Measurement
 
-### Account State ≠ User Authority
+### Primary
 
-A business account can be active while an individual user should not have permission to perform every action.
+**Reconciliation accuracy**
 
-That means product design has to separate:
+Returned and adjusted transactions should resolve to the correct financial and loyalty state without manual correction.
 
-**Account status → User role → Permission → Action**
+### Supporting measures
 
-Examples:
+- Reward adjustment accuracy
+- Manual reconciliation rate
+- Return-related loyalty support contacts
+- Time to final reward state
 
-| Role | Example responsibility |
-| --- | --- |
-| Business owner | Account-level authority |
-| Finance user | Billing and transaction responsibilities |
-| Program operator | Rewards or program operations |
-| Support user | Investigation and limited intervention |
+### Guardrails
 
-The product problem is not simply creating roles.
-
-It is defining **who can do what, under which account conditions, and with what consequences**.
-
-**The decision principle:** model authority separately from account lifecycle so access rules remain understandable as the platform grows.
-
-**What I'd measure:** permission-related support issues, unauthorized-action prevention, manual access overrides, and time to provision or change access.
+- Incorrect customer balances
+- Duplicate reward restoration
+- Earned value remaining after qualifying activity is reversed
+- Loyalty value lost during transaction reversal
 
 ---
 
-## 03 / Internal Products
+## What I'd Validate
 
-### External Experience ≠ Complete Product
+The system can be financially correct and still create a bad customer experience.
 
-Customer-facing features often depend on internal teams being able to operate, investigate, and correct the system safely.
+I'd validate:
 
-An external action may require an internal counterpart:
+- Can customers understand why their point balance changed?
+- Do they understand that a redeemed reward was restored as points?
+- Which adjustments need to be surfaced versus handled silently?
+- Does the return experience clearly distinguish the old transaction from the new purchase?
+- Where do customers interpret a correct adjustment as lost value?
 
-**Customer action → System state → Operator visibility → Controlled intervention → Audit history**
+The goal isn't to expose the reconciliation system.
 
-For example, an internal admin experience may need to support:
-
-- lifecycle changes
-- eligibility overrides
-- account investigation
-- exception resolution
-- role management
-- reason capture
-- audit history
-
-The PM problem is deciding **which operational capabilities must exist for the external product to be supportable at scale**.
-
-Building the customer experience without the operating model underneath it creates hidden manual work and inconsistent decisions.
-
-**The decision principle:** treat internal operators as real product users with defined workflows, permissions, and failure states.
-
-**What I'd measure:** manual work per account, exception resolution time, repeated escalations, and percentage of operational actions completed through supported workflows.
+It's to make the outcome **predictable, explainable, and correct**.
 
 ---
 
-## 04 / Product Lifecycle
-
-### Deprecation ≠ Deletion
-
-Platform products often need to distinguish between something no longer available for new use and something that can safely disappear.
-
-A simple lifecycle might be:
-
-**Active → Deprecated → Inactive → Deleted**
-
-Each transition affects different users and systems.
-
-Questions include:
-
-- Can existing customers continue using it?
-- Can new customers select it?
-- Should it remain visible in historical transactions?
-- What happens to downstream references?
-- When is deletion actually safe?
-
-**The decision principle:** lifecycle states should preserve history and downstream integrity while still allowing the platform to evolve.
-
-This is especially important for product data, financial records, entitlements, and other objects referenced across multiple systems.
-
-**What I'd measure:** broken downstream references, lifecycle exceptions, manual cleanup, and migration completion.
-
----
-
-## 05 / Guardrails
-
-### Flexibility Needs Boundaries
-
-Platform systems frequently need configurable behavior: pricing rules, FX handling, eligibility, account controls, or product configuration.
-
-Flexibility without explicit boundaries can create inconsistent outcomes.
-
-The product role is to define:
-
-**Allowed range → Validation rule → Exception path → Ownership**
-
-A guardrail should make invalid states difficult to create while still allowing legitimate operational flexibility.
-
-**The decision principle:** encode important business constraints into the product wherever possible instead of relying on people to remember them.
-
-**What I'd measure:** invalid configuration attempts, production corrections, exception volume, and incidents caused by unsupported states.
-
----
-
-*The studies above draw from product patterns I've encountered professionally. Companies, systems, and implementation details are generalized or fictionalized.*
+*This is a fictionalized product study based on product patterns I've encountered professionally. Point conversion, transactions, companies, and implementation details are illustrative.*
