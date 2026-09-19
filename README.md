@@ -143,7 +143,7 @@ The customer should be able to understand **what changed and why** without needi
 
 ## Try the Transaction
 
-*[Interactive demo will be linked here.]*
+→ [Launch the interactive case study](https://rtfenter.github.io/B2C-Loyalty-Product-Study/)
 
 The demo follows the same customer through redemption, purchase, return, and replacement purchase.
 
